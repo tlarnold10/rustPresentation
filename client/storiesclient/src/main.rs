@@ -4,6 +4,7 @@ use reqwest;
 use std::fs::File;
 use std::io::prelude::*;
 use rand::Rng;
+use std::io;
 
 #[derive(Serialize, Deserialize)]
 struct Story {
@@ -19,6 +20,23 @@ fn print_variable_type<T>(_: &T) {
 }
 
 fn main() {
+
+    let mut input = String::new();
+    println!("Select a type of story: ");
+    io::stdin().read_line(&mut input)
+        .expect("Failed to read line");
+
+    let mut story_genre = String::new();
+    match input.to_uppercase().trim() {
+        "ADVENTURE" => {story_genre = "adventure".to_string()},
+        "ROMCOM" => {story_genre = "romcom".to_string()},
+        "FAMILY" => {story_genre = "family".to_string()},
+        "HORROR" => {story_genre = "horror".to_string()},
+        "FANTASY" => {story_genre = "fantasy".to_string()},
+        _ => panic!("Please enter a valid story genre: adventure, romcom, family, horror, or fantasy")
+    };
+
+    println!("{}", story_genre);
     // first we need to get the data from the server
     let resp = match reqwest::blocking::get("https://httpbin.org/ip") {
         Ok(resp) => resp.text().unwrap(),
@@ -48,7 +66,15 @@ fn main() {
         Err(err) => panic!("Error: {}", err)
     };
 
-    let original_story = data.adventure;
+    let mut chosen_stories: Vec<String> = Vec::new();
+    match story_genre.as_str() {
+        "adventure" => chosen_stories = data.adventure,
+        "romcom" => chosen_stories = data.romcom,
+        "family" => chosen_stories = data.family,
+        "horror" => chosen_stories = data.horror,
+        "fantasy" => chosen_stories = data.fantasy,
+        _ => panic!("should not be here...")
+    };
 
     // next we need to get all the <> fields and then ask the user to replace them
     let mut place_holders: Vec<String> = Vec::new();
@@ -58,9 +84,10 @@ fn main() {
     // print_variable_type(&original_story);
     let pick_one = rand::thread_rng().gen_range(0..2);
     println!("random number: {}", pick_one);
-    let story_iter = original_story.iter();
+    let story_iter = chosen_stories.iter();
     for story in story_iter {
         println!("{}", story);
     }
-    println!("Random pick: {}", original_story[pick_one]);
+    let mut chosen_story = chosen_stories[pick_one].clone();
+    println!("Random pick: {}", chosen_story);
 }
