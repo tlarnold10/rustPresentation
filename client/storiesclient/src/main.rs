@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use rand::Rng;
 use std::io;
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize)]
 struct Story {
@@ -13,11 +14,6 @@ struct Story {
     family: Vec<String>,
     horror: Vec<String>,
     fantasy: Vec<String>
-}
-
-struct Replacement {
-    originals: Vec<String>,
-    replacements: Vec<String>
 }
 
 fn print_variable_type<T>(_: &T) {
@@ -55,7 +51,6 @@ fn main() {
     let mut story_genre = String::new();
     story_genre = parse_input(&input);
 
-    println!("{}", story_genre);
     // first we need to get the data from the server
     let resp = match reqwest::blocking::get("https://httpbin.org/ip") {
         Ok(resp) => resp.text().unwrap(),
@@ -90,29 +85,45 @@ fn main() {
 
     // next we need to get all the <> fields and then ask the user to replace them
     let mut place_holders: Vec<String> = Vec::new();
-    let mut new_words: Vec<String> = Vec::new();
-    let add_char: bool = true;
-    let mut word_temp: String = String::from("");
     // print_variable_type(&original_story);
     let pick_one = rand::thread_rng().gen_range(0..2);
-    println!("random number: {}", pick_one);
-    vec_to_string(&chosen_stories);
+    
     let mut chosen_story = chosen_stories[pick_one].clone();
     println!("Random pick: {}", chosen_story);
     let mut adding_chars = false;
     let mut temp_item = String::new();
+    let mut replacements = HashMap::new();
     for character in chosen_story.chars() {
         if (character == '<') {
             adding_chars = true;
+            temp_item.push(character);
         } else if (character == '>') {
             adding_chars = false;
-            place_holders.push(temp_item);
+            temp_item.push(character);
+            place_holders.push(temp_item.clone());
             temp_item = String::new();
         } else if (adding_chars) {
             temp_item.push(character);
         }
     }
-    vec_to_string(&place_holders);
+    // vec_to_string(&place_holders);
+    let mut user_input = String::new();
+    for placeholder in place_holders.iter() {
+        println!("Enter a {}: ", placeholder);
+        user_input = "".to_string();
+        io::stdin().read_line(&mut user_input)
+            .expect("Failed to read line");
+        replacements.insert(placeholder.to_string(), user_input.clone().trim().to_string());
+        println!("{placeholder}: {user_input}");
+    }
 
+    let placeholder_iterator = place_holders.iter();
+    for placeholder in placeholder_iterator {
+        println!("old word: {}", placeholder);
+        println!("new word: {}", replacements[placeholder]);
+        chosen_story = chosen_story.replacen(placeholder, &replacements[placeholder].clone(), 1);
+    }
+
+    println!("Your new story:\n{}", chosen_story);
 }
 
