@@ -1,4 +1,3 @@
-use serde_json::Result;
 use serde::{Deserialize, Serialize};
 use reqwest;
 use std::fs::File;
@@ -12,7 +11,6 @@ struct Story {
     adventure: Vec<String>,
     romcom: Vec<String>,
     family: Vec<String>,
-    horror: Vec<String>,
     fantasy: Vec<String>
 }
 
@@ -27,9 +25,8 @@ fn parse_input(input: &String) -> String {
         "ADVENTURE" => {story_genre = "adventure".to_string()},
         "ROMCOM" => {story_genre = "romcom".to_string()},
         "FAMILY" => {story_genre = "family".to_string()},
-        "HORROR" => {story_genre = "horror".to_string()},
         "FANTASY" => {story_genre = "fantasy".to_string()},
-        _ => panic!("Please enter a valid story genre: adventure, romcom, family, horror, or fantasy")
+        _ => panic!("Please enter a valid story genre: adventure, romcom, family, or fantasy")
     };
     return story_genre;
 }
@@ -44,18 +41,12 @@ fn vec_to_string(items: &[String]) -> () {
 fn main() {
 
     let mut input = String::new();
-    println!("Select a type of story (adventure, romcom, family, horror, fantasy): ");
+    println!("Select a type of story (adventure, romcom, family, fantasy): ");
     io::stdin().read_line(&mut input)
         .expect("Failed to read line");
 
     let mut story_genre = String::new();
     story_genre = parse_input(&input);
-
-    // first we need to get the data from the server
-    let resp = match reqwest::blocking::get("https://httpbin.org/ip") {
-        Ok(resp) => resp.text().unwrap(),
-        Err(err) => panic!("Error: {}", err)
-    };
 
     let mut file: File = match File::open("./data/stories.json") {
         Ok(file) => file,
@@ -78,14 +69,12 @@ fn main() {
         "adventure" => chosen_stories = data.adventure,
         "romcom" => chosen_stories = data.romcom,
         "family" => chosen_stories = data.family,
-        "horror" => chosen_stories = data.horror,
         "fantasy" => chosen_stories = data.fantasy,
         _ => panic!("should not be here...")
     };
 
     // next we need to get all the <> fields and then ask the user to replace them
     let mut place_holders: Vec<String> = Vec::new();
-    // print_variable_type(&original_story);
     let pick_one = rand::thread_rng().gen_range(0..2);
     
     let mut chosen_story = chosen_stories[pick_one].clone();
@@ -106,7 +95,6 @@ fn main() {
             temp_item.push(character);
         }
     }
-    // vec_to_string(&place_holders);
     let mut user_input = String::new();
     for placeholder in place_holders.iter() {
         println!("Enter a {}: ", placeholder);
