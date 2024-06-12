@@ -1,82 +1,89 @@
-use serde::{Deserialize, Serialize};
-use reqwest;
-use std::fs::File;
-use std::io::prelude::*;
 use rand::Rng;
-use std::io;
+use reqwest;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs::File;
+use std::io;
+use std::io::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 struct Story {
     adventure: Vec<String>,
     romcom: Vec<String>,
     family: Vec<String>,
-    fantasy: Vec<String>
+    fantasy: Vec<String>,
+}
+
+impl Story {
+    fn get_genre(&self, genre: Genre) -> &[String] {
+        match genre {
+            Genre::Adventure => &self.adventure,
+            Genre::RomCom => &self.romcom,
+            Genre::Family => &self.family,
+            Genre::Fantasy => &self.fantasy,
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+enum Genre {
+    Adventure,
+    RomCom,
+    Family,
+    Fantasy,
+}
+
+impl Genre {
+    fn parse(input: &str) -> Result<Genre, String> {
+        match input.to_uppercase().trim() {
+            "ADVENTURE" => Ok(Genre::Adventure),
+            "ROMCOM" => Ok(Genre::RomCom),
+            "FAMILY" => Ok(Genre::Family),
+            "FANTASY" => Ok(Genre::Fantasy),
+            _ => Err(String::from(
+                "Please enter a valid story genre: adventure, romcom, family, or fantasy",
+            )),
+        }
+    }
 }
 
 fn print_variable_type<T>(_: &T) {
     println!("{}", std::any::type_name::<T>());
 }
 
-
-fn parse_input(input: &String) -> String {
-    let mut story_genre = String::new();
-    match input.to_uppercase().trim() {
-        "ADVENTURE" => {story_genre = "adventure".to_string()},
-        "ROMCOM" => {story_genre = "romcom".to_string()},
-        "FAMILY" => {story_genre = "family".to_string()},
-        "FANTASY" => {story_genre = "fantasy".to_string()},
-        _ => panic!("Please enter a valid story genre: adventure, romcom, family, or fantasy")
-    };
-    return story_genre;
-}
-
 fn vec_to_string(items: &[String]) -> () {
-    let items_iterator = items.iter();
-    for item in items_iterator {
-        println!("{}", item);
-    }
+    let joined = items.join("");
+    println!("{}", joined);
 }
 
 fn main() {
-
     let mut input = String::new();
     println!("Select a type of story (adventure, romcom, family, fantasy): ");
-    io::stdin().read_line(&mut input)
+    io::stdin()
+        .read_line(&mut input)
         .expect("Failed to read line");
 
-    let mut story_genre = String::new();
-    story_genre = parse_input(&input);
-
-    let mut file: File = match File::open("./data/stories.json") {
-        Ok(file) => file,
-        Err(err) => panic!("could not open: {}", err)
+    let story_genre = match Genre::parse(&input) {
+        Ok(genre) => genre,
+        Err(err) => panic!("{err}"),
     };
-    let mut contents = String::new();
-    file.read_to_string(&mut contents);
-    match file.read_to_string(&mut contents) {
-        Ok(_) => print!("Read from file"),
-        Err(err) => panic!("could not read file: {}", err)
-    }
+
+    let contents = match std::fs::read_to_string("./data/stories.json") {
+        Ok(contents) => contents,
+        Err(err) => panic!("could not read file: {}", err),
+    };
 
     let data: Story = match serde_json::from_str(&contents) {
         Ok(data) => data,
-        Err(err) => panic!("Error: {}", err)
+        Err(err) => panic!("Error: {}", err),
     };
 
-    let mut chosen_stories: Vec<String> = Vec::new();
-    match story_genre.as_str() {
-        "adventure" => chosen_stories = data.adventure,
-        "romcom" => chosen_stories = data.romcom,
-        "family" => chosen_stories = data.family,
-        "fantasy" => chosen_stories = data.fantasy,
-        _ => panic!("should not be here...")
-    };
+    let chosen_stories = data.get_genre(story_genre);
 
     // next we need to get all the <> fields and then ask the user to replace them
     let mut place_holders: Vec<String> = Vec::new();
-    let pick_one = rand::thread_rng().gen_range(0..2);
-    
+    let pick_one = rand::thread_rng().gen_range(0..chosen_stories.len());
+
     let mut chosen_story = chosen_stories[pick_one].clone();
     println!("Random pick: {}", chosen_story);
     let mut adding_chars = false;
@@ -95,18 +102,21 @@ fn main() {
             temp_item.push(character);
         }
     }
-    let mut user_input = String::new();
+
     for placeholder in place_holders.iter() {
         println!("Enter a {}: ", placeholder);
-        user_input = "".to_string();
-        io::stdin().read_line(&mut user_input)
+        let mut user_input = String::new();
+        io::stdin()
+            .read_line(&mut user_input)
             .expect("Failed to read line");
-        replacements.insert(placeholder.to_string(), user_input.clone().trim().to_string());
+        replacements.insert(
+            placeholder.to_string(),
+            user_input.clone().trim().to_string(),
+        );
         println!("{placeholder}: {user_input}");
     }
 
-    let placeholder_iterator = place_holders.iter();
-    for placeholder in placeholder_iterator {
+    for placeholder in place_holders.iter() {
         println!("old word: {}", placeholder);
         println!("new word: {}", replacements[placeholder]);
         chosen_story = chosen_story.replacen(placeholder, &replacements[placeholder].clone(), 1);
@@ -114,4 +124,3 @@ fn main() {
 
     println!("Your new story:\n{}", chosen_story);
 }
-
