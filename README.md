@@ -21,3 +21,6 @@ You will need to either have Docker or Rust installed.
 # Architecture
 - I was going to use a server and client model for this, but currently all logic just lives in the client.
     - At some point it would be great to create an http server and have the client make http requests to the server. Then the server would handle all the logic, store the templates, and even log all stories that were told. Future me's problem!
+
+# Presentation
+- Utilizes [Slidev](https://sli.dev/) to run a presentation from a Vue.js web app. See the `README.md` file in the `./presentation/rust` directory to see more information and how to run.
