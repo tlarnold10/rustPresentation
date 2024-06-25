@@ -6,6 +6,10 @@ use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 
+// create a new struct (custom data type)
+// we also add the Serialize and Deserialize traits in order to convert json data into a Story
+// struct.
+// Using derive allows us to easily implement functionality for our own struct (or enum)
 #[derive(Serialize, Deserialize)]
 struct Story {
     adventure: Vec<String>,
@@ -14,6 +18,7 @@ struct Story {
     fantasy: Vec<String>,
 }
 
+// create a function called get_genre for that struct
 impl Story {
     fn get_genre(&self, genre: Genre) -> &[String] {
         match genre {
@@ -25,6 +30,8 @@ impl Story {
     }
 }
 
+// enum in rust,
+// we use the derive attribute to be able to use the Copy and Clone traits
 #[derive(Copy, Clone)]
 enum Genre {
     Adventure,
@@ -33,6 +40,10 @@ enum Genre {
     Fantasy,
 }
 
+// parse function for the Genre enum
+// returns a result object (Genre if successful, otherwise a String)
+// this is how Rust handles errors and makes you handle any errors that you could encounter when
+// this is called
 impl Genre {
     fn parse(input: &str) -> Result<Genre, String> {
         match input.to_uppercase().trim() {
@@ -63,6 +74,7 @@ fn main() {
         .read_line(&mut input)
         .expect("Failed to read line");
 
+    // some great examples of error handling in rust and the match (switch) operation
     let story_genre = match Genre::parse(&input) {
         Ok(genre) => genre,
         Err(err) => panic!("{err}"),
@@ -119,6 +131,8 @@ fn main() {
     for placeholder in place_holders.iter() {
         println!("old word: {}", placeholder);
         println!("new word: {}", replacements[placeholder]);
+        // need to replace each of the place holder values with the new word. Using clone to make
+        // this easier to work with.
         chosen_story = chosen_story.replacen(placeholder, &replacements[placeholder].clone(), 1);
     }
 
