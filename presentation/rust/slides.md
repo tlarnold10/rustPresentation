@@ -47,7 +47,7 @@ image: ./assets/rust-logo.png
 - Low(er) level language that allows the developer to manage memory.
 - Mostly used for systems level programming.
 - Statically and strongly typed language (reliability)
-- Secure and modern replacement for c and c++
+- Secure and modern replacement for C and C++
 
 ---
 transition: slide-left
@@ -60,6 +60,7 @@ image: ./assets/rust.png
 - Extremely fast and reliable
 - Most admirred language from the 2023 Stack Overflow survey, and pretty high on the desired rank. https://survey.stackoverflow.co/2023/#section-admired-and-desired-programming-scripting-and-markup-languages
 - Gaining traction and an active community
+    - Many new JavaScript build tools (Turbopack and Rspack)
 - Great cross platform compatability
 
 ---
@@ -70,11 +71,10 @@ image: ./assets/rust2.png
 
 # Why not rust?
 
-- Some difficult concepts to learn
-    - Memory management
+- Several difficult concepts to learn
+    - Memory management, string, multi-threading
 - Lower developer velocity (takes longer to actually build and ship things)
-- Not for UI related application development (native and web)
-- Very few job openings as many organizations are interested in the language, but have not yet found a place for it.
+- Very few job openings as many organizations are interested in the language but have not yet found a place for it.
 - While it is very fast, that is not really needed for a majority of application development. Especially when you look at the lower developer velocity trade-off
 
 ---
@@ -88,6 +88,7 @@ image: ./assets/rust-logo.png
     - Working with files, strings, and hashMap
     - Difficult enough to do in Rust without taking up a significant amount of time or stress
     - Funny
+- Let's run the application and take a look at the rust code
 
 ---
 transition: fade-out
@@ -141,10 +142,10 @@ image: ./assets/rust-logo.png
 
 # What next?
 - What would I have learned next?
-    - lifetimes are a big part of rust and get much more difficult to understand
+    - lifetimes and multi-threading are big parts of rust and complicate rust development a lot more
     - dig deeper into how the borrow checker works
-- Would I recommend Rust?
-    - not a ton of openings and many companies are trying to understand the actual use case for the language...
+- Would I recommend Rust? Maybe?
+    - not a ton of openings and many companies are trying to understand the actual use case for the language... 
     - tons of promise, so worth picking up if you have not used a lower level language
 
 ---
